@@ -1,58 +1,62 @@
 #!/bin/bash
 set -e
 
-PORT_HTTP=24000
-PORT_SOCKS=25000
-USERNAME="aac"
-PASSWORD="yiyann***999"
-CONFIG_PATH="/etc/3proxy/3proxy.cfg"
+PORT=1080
+USER="proxyuser"
+PASS="proxypass"
+CONF_PATH="/etc/opt/ss5/ss5.conf"
+AUTH_PATH="/etc/opt/ss5/ss5.passwd"
 
-echo "📦 安装 3proxy..."
-
+echo "📦 安装 SS5（支持 SOCKS5 和 HTTP）..."
 apt update
-apt install -y 3proxy
+apt install -y gcc make libpam0g-dev libssl-dev iproute2 wget curl sudo
 
-# 写入配置文件
-cat > $CONFIG_PATH <<EOF
-daemon
-maxconn 1000
-nserver 8.8.8.8
-nscache 65536
-timeouts 1 5 30 60 180 1800 15 60
+# 获取源码并编译安装 SS5
+cd /tmp
+wget https://github.com/MerlinKodo/ss5/archive/refs/heads/master.zip -O ss5.zip
+unzip ss5.zip
+cd ss5-master
+./configure
+make && make install
 
-users $USERNAME:CL:$PASSWORD
-auth strong
+# 添加认证配置
+echo "auth 0.0.0.0/0 - u" >> $CONF_PATH
+echo "permit u $USER" >> $CONF_PATH
+echo "$USER $PASS" > $AUTH_PATH
+chmod 600 $AUTH_PATH
 
-proxy -n -a -p$PORT_HTTP -i0.0.0.0 -e0.0.0.0
-socks -p$PORT_SOCKS
+# 开启认证功能
+sed -i 's/^auth.*$/auth    0.0.0.0\/0    -    u/' $CONF_PATH
+sed -i 's/^permit.*$/permit u    '$USER'/' $CONF_PATH
 
-flush
-EOF
-
-# 创建 systemd 服务文件
-cat > /etc/systemd/system/3proxy.service <<EOF
+# 创建服务文件
+cat > /etc/systemd/system/ss5.service <<EOF
 [Unit]
-Description=3proxy Proxy Server
+Description=SS5 Socks Server
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/3proxy $CONFIG_PATH
-ExecReload=/bin/kill -HUP \$MAINPID
-Restart=always
+ExecStart=/usr/local/sbin/ss5 -u root
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
 # 启动服务
+systemctl daemon-reexec
 systemctl daemon-reload
-systemctl enable 3proxy
-systemctl restart 3proxy
+systemctl enable ss5
+systemctl restart ss5
 
+# 获取公网 IP
 IP=$(curl -s ifconfig.me)
 
-echo "✅ 安装成功！"
-echo "----------------------------------------"
-echo "🌐 HTTP 代理地址: http://$USERNAME:$PASSWORD@$IP:$PORT_HTTP"
-echo "🧦 SOCKS5 代理地址: socks5://$USERNAME:$PASSWORD@$IP:$PORT_SOCKS"
-echo "----------------------------------------"
+echo "✅ SS5 安装完成"
+echo "----------------------------------"
+echo "地址: $IP"
+echo "端口: $PORT"
+echo "账号: $USER"
+echo "密码: $PASS"
+echo "协议: SOCKS5 / HTTP"
+echo "----------------------------------"
