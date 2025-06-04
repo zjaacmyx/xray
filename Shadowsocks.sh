@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-PORT=12000
+PORT=22000
 PASSWORD="aac3336362PP"
 METHOD="aes-256-gcm"
 CONFIG_PATH="/etc/shadowsocks-libev/config.json"
