@@ -8,15 +8,13 @@ CONFIG_PATH="/etc/shadowsocks-libev/config.json"
 
 echo "📦 安装 Shadowsocks-libev..."
 
-# 安装 Shadowsocks-libev
+# 安装依赖
 apt update
-apt install -y shadowsocks-libev
-apt install -y curl unzip socat
-apt install -y sudo
+apt install -y shadowsocks-libev curl unzip socat sudo
 
 # 写入配置文件
 mkdir -p /etc/shadowsocks-libev
-cat > $CONFIG_PATH <<EOF
+cat > "$CONFIG_PATH" <<EOF
 {
   "server": "0.0.0.0",
   "server_port": $PORT,
@@ -29,20 +27,26 @@ cat > $CONFIG_PATH <<EOF
 }
 EOF
 
-# 启动并设置开机启动
+# 启动服务
 systemctl restart shadowsocks-libev
 systemctl enable shadowsocks-libev
 
 # 获取公网 IP
-IP=\$(curl -s ifconfig.me)
+IP=$(curl -s ifconfig.me)
 
-echo "✅ Shadowsocks 安装成功！"
+# 生成 Base64 编码链接
+PLAIN="$METHOD:$PASSWORD@$IP:$PORT"
+ENCODED=$(echo -n "$PLAIN" | base64 | tr -d '=' | tr '/+' '_-')  # V2Ray兼容格式
+
+# 打印结果
+echo ""
+echo "✅ Shadowsocks 安装成功！已启动"
 echo "----------------------------------------"
-echo "地址: \$IP"
-echo "端口: $PORT"
-echo "密码: $PASSWORD"
-echo "加密: $METHOD"
+echo "地址    : $IP"
+echo "端口    : $PORT"
+echo "密码    : $PASSWORD"
+echo "加密方式: $METHOD"
 echo "----------------------------------------"
-echo "连接 URI（Base64 编码）:"
-echo -n "ss://\$(echo -n \"$METHOD:$PASSWORD@\$IP:$PORT\" | base64 -w0)"
-echo
+echo "👉 V2Ray/小火箭等客户端复制下方链接导入："
+echo "ss://$ENCODED"
+echo "----------------------------------------"
