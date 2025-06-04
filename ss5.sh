@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-PORT=1080
+PORT=23000
 USER="proxyuser"
 PASS="proxypass"
 CONF_PATH="/etc/opt/ss5/ss5.conf"
