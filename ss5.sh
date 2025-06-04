@@ -25,7 +25,7 @@ EOF
 
 echo "$USERNAME $PASSWORD" >> /etc/opt/ss5.passwd
 
-# 启动 ss5
+# 启动 ss5，后台运行
 ss5 -u $USERNAME -p $PASSWORD -b 0.0.0.0 -l $PORT &
 
 IP=$(curl -s ifconfig.me)
