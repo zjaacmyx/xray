@@ -2,7 +2,7 @@
 set -e
 
 PORT=22000
-PASSWORD="aac3336362PP"
+PASSWORD="yiyann***999"
 METHOD="aes-256-gcm"
 CONFIG_PATH="/etc/shadowsocks-libev/config.json"
 
