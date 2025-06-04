@@ -9,6 +9,9 @@ SERVICE_FILE="/etc/systemd/system/xray.service"
 
 echo "📦 安装 Xray Core v1.8.4..."
 
+apt update
+apt install -y curl unzip socat
+
 # 创建目录
 sudo mkdir -p "$XRAY_DIR"
 sudo mkdir -p "$(dirname $CONFIG_FILE)"
