@@ -1,0 +1,58 @@
+#!/bin/bash
+set -e
+
+PORT_HTTP=24000
+PORT_SOCKS=25000
+USERNAME="aac"
+PASSWORD="yiyann***999"
+CONFIG_PATH="/etc/3proxy/3proxy.cfg"
+
+echo "📦 安装 3proxy..."
+
+apt update
+apt install -y 3proxy
+
+# 写入配置文件
+cat > $CONFIG_PATH <<EOF
+daemon
+maxconn 1000
+nserver 8.8.8.8
+nscache 65536
+timeouts 1 5 30 60 180 1800 15 60
+
+users $USERNAME:CL:$PASSWORD
+auth strong
+
+proxy -n -a -p$PORT_HTTP -i0.0.0.0 -e0.0.0.0
+socks -p$PORT_SOCKS
+
+flush
+EOF
+
+# 创建 systemd 服务文件
+cat > /etc/systemd/system/3proxy.service <<EOF
+[Unit]
+Description=3proxy Proxy Server
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/3proxy $CONFIG_PATH
+ExecReload=/bin/kill -HUP \$MAINPID
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 启动服务
+systemctl daemon-reload
+systemctl enable 3proxy
+systemctl restart 3proxy
+
+IP=$(curl -s ifconfig.me)
+
+echo "✅ 安装成功！"
+echo "----------------------------------------"
+echo "🌐 HTTP 代理地址: http://$USERNAME:$PASSWORD@$IP:$PORT_HTTP"
+echo "🧦 SOCKS5 代理地址: socks5://$USERNAME:$PASSWORD@$IP:$PORT_SOCKS"
+echo "----------------------------------------"
