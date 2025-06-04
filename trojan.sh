@@ -14,6 +14,7 @@ echo "📦 安装依赖和 Xray Core v1.8.4..."
 # 安装依赖
 apt update
 apt install -y curl unzip socat
+apt install -y sudo
 
 # 安装 acme.sh
 curl https://get.acme.sh | sh
