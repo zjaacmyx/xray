@@ -1,0 +1,44 @@
+{
+    "api": {
+        "id": null,
+        "worker-id": null
+    },
+    "http": {
+        "enabled": true, // 我们在编译时启用了HTTP，所以这里也设为true
+        "host": "0.0.0.0", // 监听所有接口，以便从外部访问API (注意安全)
+        "port": 8181,     // API端口，确保防火墙允许
+        "access-token": null, // 【重要】设置一个强密码!!!
+        "restricted": true
+    },
+    "autosave": true,
+    "colors": true,
+    "title": true,
+    "version": 1,
+    "bind": [
+        "0.0.0.0:7777" // 你的矿机将连接到VPS的这个端口
+    ],
+    "pools": [
+        {
+            "algo": "rx/0",
+            "coin": "monero",
+            "url": "pool.supportxmr.com:3333",
+            "user": "85iRwp92DdBAoBax2K7DTGczQbk8WTYeW72Md4Ccb32pbPWFbdVzvmi7Dp1ae48pABbbSRu6ZLdzdAQ5kEzDSJaWRehZW6b.VPSProxy",
+            "pass": "x",
+            "rig-id": null,
+            "keepalive": true,
+            "enabled": true,
+            "tls": false,
+            "tls-fingerprint": null,
+            "daemon": false,
+            "daemon-poll-interval": 1000
+        }
+    ],
+    "retries": 5,
+    "retry-pause": 5,
+    "verbose": false,
+    "log-file": "xmrig-proxy.log",
+    "syslog": false,
+    "custom-diff": 0,
+    "custom-diff-stats": false,
+    "mode": "simple"
+}
