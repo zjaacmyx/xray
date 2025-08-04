@@ -22,7 +22,7 @@
             "algo": "rx/0",
             "coin": "monero",
             "url": "pool.supportxmr.com:3333",
-            "user": "85iRwp92DdBAoBax2K7DTGczQbk8WTYeW72Md4Ccb32pbPWFbdVzvmi7Dp1ae48pABbbSRu6ZLdzdAQ5kEzDSJaWRehZW6b.VPSProxy",
+            "user": "85iRwp92DdBAoBax2K7DTGczQbk8WTYeW72Md4Ccb32pbPWFbdVzvmi7Dp1ae48pABbbSRu6ZLdzdAQ5kEzDSJaWRehZW6b.aac",
             "pass": "x",
             "rig-id": null,
             "keepalive": true,
