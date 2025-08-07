@@ -7,8 +7,8 @@ echo "开始安装 hysteria2..."
 # 安装必要工具
 apt update && apt install -y curl wget unzip openssl
 
-# 精准获取最新版 tag_name
-VERSION=$(curl -s https://api.github.com/repos/apernet/hysteria/releases/latest | grep '"tag_name":' | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+# 固定版本号
+VERSION="v2.6.2"
 
 echo "下载 hysteria 版本 $VERSION"
 wget -O hysteria.tar.gz "https://github.com/apernet/hysteria/releases/download/${VERSION}/hysteria-linux-amd64.tar.gz"
