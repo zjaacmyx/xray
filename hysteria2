@@ -1,16 +1,31 @@
 #!/bin/bash
 
-# 安装 curl 和 unzip（如果没有）
-apt update && apt install -y curl unzip
+set -e
 
-# 下载最新版 Hysteria2
-VERSION=$(curl -s https://api.github.com/repos/apernet/hysteria/releases/latest | grep tag_name | cut -d '"' -f 4)
-wget -O hysteria.tar.gz https://github.com/apernet/hysteria/releases/download/${VERSION}/hysteria-linux-amd64.tar.gz
+echo "开始安装 hysteria2..."
+
+# 安装必要工具
+apt update && apt install -y curl wget openssl
+
+# 下载最新版 hysteria
+LATEST_URL=$(curl -s https://api.github.com/repos/apernet/hysteria/releases/latest \
+  | grep "browser_download_url" \
+  | grep linux-amd64 \
+  | cut -d '"' -f 4)
+
+wget -O hysteria.tar.gz "$LATEST_URL"
+
+# 解压
 tar -xzvf hysteria.tar.gz
+
+# 移动可执行文件到 /usr/local/bin 并赋予执行权限
 mv hysteria /usr/local/bin/
 chmod +x /usr/local/bin/hysteria
 
-# 随机生成密码
+# 清理下载文件
+rm hysteria.tar.gz
+
+# 生成随机密码
 PASS=$(openssl rand -hex 8)
 
 # 生成自签 TLS 证书
@@ -18,7 +33,7 @@ mkdir -p /etc/hysteria
 openssl ecparam -genkey -name prime256v1 -out /etc/hysteria/private.key
 openssl req -new -x509 -key /etc/hysteria/private.key -out /etc/hysteria/cert.pem -days 3650 -subj "/CN=bing.com"
 
-# 写入配置文件
+# 生成配置文件
 cat > /etc/hysteria/config.yaml <<EOF
 listen: :5678
 tls:
@@ -34,7 +49,7 @@ masquerade:
     rewriteHost: true
 EOF
 
-# 创建 systemd 服务
+# 创建 systemd 服务文件
 cat > /etc/systemd/system/hysteria.service <<EOF
 [Unit]
 Description=Hysteria 2 Server
@@ -48,16 +63,19 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 
-# 启动服务
-systemctl daemon-reexec
+# 重新加载 systemd，启动并设置开机自启
+systemctl daemon-reload
 systemctl enable hysteria
-systemctl start hysteria
+systemctl restart hysteria
 
-# 获取服务器 IP
+# 获取公网 IP
 IP=$(curl -s ipv4.ip.sb)
 
-# 输出连接信息
+# 输出节点链接
 echo
-echo "✅ 部署完成！以下是你的 Hysteria2 节点信息："
-echo
+echo "✅ hysteria2 部署完成！"
+echo "节点链接："
 echo "hy2://$PASS@$IP:5678?insecure=1&sni=bing.com#Hysteria2-无域名节点"
+echo
+echo "如果你开启了防火墙，请记得放行 UDP 5678 端口："
+echo "ufw allow 5678/udp"
