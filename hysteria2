@@ -5,15 +5,16 @@ set -e
 echo "开始安装 hysteria2..."
 
 # 安装必要工具
-apt update && apt install -y curl wget openssl
+apt update && apt install -y curl wget unzip openssl
 
-# 下载最新版 hysteria
-LATEST_URL=$(curl -s https://api.github.com/repos/apernet/hysteria/releases/latest \
-  | grep "browser_download_url" \
-  | grep linux-amd64 \
-  | cut -d '"' -f 4)
+# 获取最新版本号
+VERSION=$(curl -s https://api.github.com/repos/apernet/hysteria/releases/latest | grep tag_name | head -1 | cut -d '"' -f 4)
 
-wget -O hysteria.tar.gz "$LATEST_URL"
+# 构造下载链接
+DOWNLOAD_URL="https://github.com/apernet/hysteria/releases/download/${VERSION}/hysteria-linux-amd64.tar.gz"
+
+echo "下载 hysteria 版本 $VERSION"
+wget -O hysteria.tar.gz "$DOWNLOAD_URL"
 
 # 解压
 tar -xzvf hysteria.tar.gz
